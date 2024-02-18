@@ -1,5 +1,7 @@
+import uuid
+
 from BaseV3 import *
-from uuid_text import UuidText
+from accessories.uuid_text import UuidText
 
 
 class SimpleDump(TraceV3Chunk):

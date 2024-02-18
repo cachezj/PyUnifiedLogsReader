@@ -1,6 +1,8 @@
 from TraceParserV3 import *
 import sys
-import base_file
+from accessories import base_file
+
+
 # TODO: create a dictionary for each member of the structure containing the size of each member and the struct size
 #  and endianity string
 

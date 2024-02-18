@@ -12,8 +12,6 @@ class ChunkSet(TraceV3Chunk):
         super().__init__(tracev3_fd)
         self.uncompressed_data_size_from_sub_chunk: int = uncompressed_data_size
         self.compressed_data_size: int = self.data_size
-        self.chunks: list = self.parse_chunks()
-        self.align_cursor()
 
     def print_v3(self):
         super().print_v3()
@@ -25,21 +23,21 @@ class ChunkSet(TraceV3Chunk):
         #     chunks_file.write(chunks_buf)
         reader = io.BufferedReader(io.BytesIO(chunks_buf))
         while reader.tell() != self.uncompressed_data_size_from_sub_chunk:
-            print(f"{reader.tell()}")
             chunk_type = read_and_return_to_cursor(reader, reader.tell(), 4)
             chunk_type = struct.unpack("<I", chunk_type)[0]
             if len(chunks) > 0 and chunks[-1].chunk_number == 44:
-                print(f"{hex(reader.tell())}")
+                pass
+                # print(f"{hex(reader.tell())}")
             if chunk_type not in chunk_types.keys():
-                print(f"{hex(reader.tell())}")
+                # print(f"{hex(reader.tell())}")
                 raise ValueError("Unknown chunk type")
             chunk_type_human_readable = chunk_types[chunk_type]
             chunk: TraceV3Chunk = ctors_by_chunk_type[chunk_type_human_readable](reader)
-            chunks.append(chunk)
-            chunk.print_v3()
+            yield from chunk.parse()
+            # chunk.print_v3()
 
         reader.close()
-        return chunks
+        self.align_cursor()
 
     def read_lz4_block(self):
         start_magic = self.fd.read(CHUNK_SET_LZ4_START_MAGIC_SIZE)
@@ -61,7 +59,7 @@ class ChunkSet(TraceV3Chunk):
             raise ValueError("Invalid uncompressed data size in chunk set")
         compressed_size = struct.unpack("<I", self.fd.read(CHUNK_SET_LZ4_COMPRESSED_DATA_SIZE))[0]
         compressed_data = self.fd.read(compressed_size)
-        print(hex(self.fd.tell()))
+        # print(hex(self.fd.tell()))
         # with open("test.lz4", 'wb') as lz4_file:
         #     lz4_file.write(compressed_data)
         end_magic = self.fd.read(CHUNK_SET_LZ4_END_MAGIC_SIZE)

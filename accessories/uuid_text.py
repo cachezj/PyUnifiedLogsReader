@@ -1,9 +1,9 @@
 import io
 import uuid
-from typing import Union, Tuple, BinaryIO
+from typing import Union, Tuple
 from pathlib import Path
 
-from base_file import BaseFile
+from accessories.base_file import BaseFile
 from structs.uuid_structs import *
 
 

@@ -1,8 +1,7 @@
-import io
-from typing import Union, Tuple, BinaryIO
+from typing import Union, Tuple
 from pathlib import Path
 
-from base_file import BaseFile
+from accessories.base_file import BaseFile
 from structs.dsc_structs import *
 
 

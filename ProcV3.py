@@ -1,6 +1,6 @@
 from BaseV3 import *
-from uuid_text import UuidText
-
+from accessories.uuid_text import UuidText
+import uuid
 
 class ProcInfo(GenericTraceV3ChunkSection):
     def __init__(self, tracev3_fd: io.BufferedReader, uuids_offset: int, uuid_num: int, subsystems_offset: int):
@@ -125,3 +125,4 @@ class ProcInfo(GenericTraceV3ChunkSection):
         subsystems: {self.proc_subsystems}
         uuids: {self.uuids_info}
         """)
+

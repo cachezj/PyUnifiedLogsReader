@@ -1,9 +1,5 @@
-from consts import *
 from abc import *
-import uuid
 from utils import *
-from uuid_text import UuidText
-from dsc import DSC
 
 
 class GenericTraceV3ChunkSection(ABC):
@@ -54,6 +50,9 @@ class TraceV3Chunk(GenericTraceV3ChunkSection):
         if self.tag in chunk_types.keys():
             return chunk_types[self.tag]
 
+    def parse(self):
+        yield self
+        return
     @abstractmethod
     def print_v3(self):
         print(f"tag = {self.tag}")

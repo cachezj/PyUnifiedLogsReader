@@ -27,15 +27,13 @@ class TraceV3Parser:
         self.offset += chunk.total_chunk_size
         self.fd.seek(self.offset)
 
-    @staticmethod
-    def parse_v3_chunk(constructor: Callable, *args):
-        v3_obj = constructor(*args)
-        return v3_obj
-
     def parse_v3_chunks(self):
-        header_chunk = self.parse_v3_chunk(HeaderChunk, *[self.fd])
+        header_chunk = HeaderChunk(self.fd)
         self.update_offset_and_seek(header_chunk)
-        Globals.catalog = self.parse_v3_chunk(CatalogChunk, *[self.fd])
+        Globals.catalog = CatalogChunk(self.fd)
         sub_chunks = Globals.catalog.get_sub_chunks()
         for sub_chunk in sub_chunks:
-            Globals.chunk_sets.append(self.parse_v3_chunk(ChunkSet, *[self.fd, sub_chunk.uncompressed_data_size]))
+            chunk_set = ChunkSet(self.fd, sub_chunk.uncompressed_data_size)
+            for chunk in chunk_set.parse_chunks():
+                chunk.print_v3()
+                chunk.

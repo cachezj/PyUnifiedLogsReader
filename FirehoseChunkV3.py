@@ -3,7 +3,8 @@ import utils
 from ProcV3 import ProcInfo
 from BaseV3 import *
 from utils import *
-
+from accessories.uuid_text import UuidText
+from accessories.dsc import DSC
 
 class FirehoseChunk(TraceV3Chunk):
     def __init__(self, tracev3_fd: io.BufferedReader):
@@ -28,11 +29,6 @@ class FirehoseChunk(TraceV3Chunk):
             self.private_data: str = self.read_private_data()
         else:
             self.private_data = None
-        self.fd.seek(self.trace_point_offset)
-        self.points: list = self.read_trace_points()
-        if self.has_private_data:
-            self.fd.seek(self.firehose_end)
-        self.align_cursor()
 
     def read_private_data(self):
         self.fd.seek(self.private_data_real_offset)
@@ -73,8 +69,7 @@ class FirehoseChunk(TraceV3Chunk):
 
     def read_trace_points(self):
         trace_points_start = self.fd.tell()
-        print(f"{trace_points_start}")
-        points = list()
+        # print(f"{trace_points_start}")
         i = 1
         while self.fd.tell() < trace_points_start + self.firehose_trace_points_size:
             record_type = struct.unpack("<B",
@@ -84,10 +79,16 @@ class FirehoseChunk(TraceV3Chunk):
                 raise ValueError("bad record type")
 
             point = trace_point_log_type_ctors[record_type](self.fd, self)
-            point.print_v3()
-            points.append(point)
+            # point.print_v3()
+            yield point
             i += 1
-        return points
+
+    def parse(self):
+        self.fd.seek(self.trace_point_offset)
+        yield from self.read_trace_points()
+        if self.has_private_data:
+            self.fd.seek(self.firehose_end)
+        self.align_cursor()
 
     def print_v3(self):
         print(f"""
@@ -174,14 +175,14 @@ class FirehoseTracePoint(GenericTraceV3ChunkSection):
 
     def read_record_type(self):
         r_type = struct.unpack("<B", self.fd.read(FIREHOSE_TRACE_POINT_RECORD_TYPE_SIZE))[0]
-        print(hex(r_type))
+        # print(hex(r_type))
         if r_type not in firehose_trace_point_record_types.keys():
             raise ValueError("invalid record type")
         return firehose_trace_point_record_types[r_type]
 
     def read_log_type(self):
         l_type = struct.unpack("<B", self.fd.read(FIREHOSE_TRACE_POINT_LOG_TYPE_SIZE))[0]
-        print(hex(l_type))
+        # print(hex(l_type))
         if l_type not in log_types.keys():
             raise ValueError("invalid record type")
         return log_types[l_type]
@@ -428,43 +429,43 @@ class LogTracePoint(FirehoseTracePoint):
     def read_current_aid(self):
         if self.flags_dict[FIREHOSE_TRACE_POINT_FLAG_HAS_CURRENT_AID]:
             self.current_activity_id = struct.unpack("<Q", self.fd.read(FIREHOSE_TRACE_POINT_LOG_ACTIVITY_ID_SIZE))[0]
-            print(f"current activity id: {self.current_activity_id}")
+            # print(f"current activity id: {self.current_activity_id}")
 
     def read_private_data_range(self):
         if self.flags_dict[FIREHOSE_TRACE_POINT_FLAG_HAS_PRIVATE_DATA]:
             self.private_data_range_off = \
                 struct.unpack("<I", self.fd.read(FIREHOSE_TRACE_POINT_LOG_PRIVATE_DATA_RANGE_SIZE))[0]
-        print(f"private data range: {self.private_data_range_off}")
+        # print(f"private data range: {self.private_data_range_off}")
 
     def read_current_uuid_entry_load_addr_lower(self):
         load_addr_lower = self.fd.read(FIREHOSE_TRACE_POINT_LOG_UUID_ENTRY_LOAD_ADDRESS_LOWER_SIZE)
-        print(load_addr_lower.hex())
+        # print(load_addr_lower.hex())
         self.uuid_entry_load_addr_lower = struct.unpack("<I", load_addr_lower)[0]
-        print(f"uuid entry load addr lower: {self.uuid_entry_load_addr_lower}")
+        # print(f"uuid entry load addr lower: {self.uuid_entry_load_addr_lower}")
 
     def read_large_offset_data(self):
         if self.flags_dict[FIREHOSE_TRACE_POINT_FLAG_HAS_LARGE_OFFSET]:
             large_offset = struct.unpack("<H", self.fd.read(FIREHOSE_TRACE_POINT_LOG_LARGE_OFFSET_DATA_SIZE))[0]
             self.large_offset_data = large_offset << 31 | self.format_str_reference
-            print(f"large offset data: {self.large_offset_data}")
+            # print(f"large offset data: {self.large_offset_data}")
 
     def read_current_uuid_entry_load_addr_upper(self):
         if self.strings_file_type == ABSOLUTE_FILE_TYPE:
             self.uuid_entry_load_addr_upper = \
                 struct.unpack("<H", self.fd.read(FIREHOSE_TRACE_POINT_LOG_UUID_ENTRY_LOAD_ADDRESS_UPPER_SIZE))[0]
-            print(f"uuid entry load addr upper: {self.uuid_entry_load_addr_upper}")
+            # print(f"uuid entry load addr upper: {self.uuid_entry_load_addr_upper}")
 
     def read_uuidtext_file_id(self):
         if self.strings_file_type == UUID_RELATIVE_FILE_TYPE:
             self.uuid_text_file_identifier = uuid.UUID(self.fd.read(FIREHOSE_TRACE_POINT_LOG_UUID_SIZE).hex())
-            print(f"uuid text file identifier: {self.uuid_text_file_identifier}")
+            # print(f"uuid text file identifier: {self.uuid_text_file_identifier}")
 
     def read_large_shared_cache_data(self):
         if self.strings_file_type == LARGE_SHARED_CACHE_FILE_TYPE:
             shared_cache_data = \
                 struct.unpack("<H", self.fd.read(FIREHOSE_TRACE_POINT_LOG_LARGE_SHARED_CACHE_DATA_SIZE))[0]
             self.large_shared_cache_data = shared_cache_data << 31 | self.format_str_reference
-            print(f"large shared cache data: {self.large_shared_cache_data}")
+            # print(f"large shared cache data: {self.large_shared_cache_data}")
 
     def read_subsystem(self):
         if self.flags_dict[FIREHOSE_TRACE_POINT_FLAG_HAS_SUBSYSTEM]:
@@ -473,12 +474,12 @@ class LogTracePoint(FirehoseTracePoint):
                 raise ValueError("Invalid subsystem id")
             self.subsystem = self.proc.proc_subsystems[subsystem_id]["subsystem"]
             self.category = self.proc.proc_subsystems[subsystem_id]["category"]
-            print(f"subsystem: {self.subsystem}")
+            # print(f"subsystem: {self.subsystem}")
 
     def read_ttl(self):
         if self.flags_dict[FIREHOSE_TRACE_POINT_FLAG_HAS_RULES]:
             self.current_activity_id = struct.unpack("<B", self.fd.read(FIREHOSE_TRACE_POINT_LOG_TTL_SIZE))[0]
-            print(f"ttl: {self.ttl}")
+            # print(f"ttl: {self.ttl}")
 
     def read_format_string(self):
         if self.strings_file_type == SHARED_CACHE_FILE_TYPE:
@@ -504,14 +505,14 @@ class LogTracePoint(FirehoseTracePoint):
         if self.flags_dict[FIREHOSE_TRACE_POINT_FLAG_HAS_OVERSIZE]:
             self.oversize_data_reference = \
                 struct.unpack("<H", self.fd.read(FIREHOSE_TRACE_POINT_LOG_OVERSIZE_DATA_REFERENCE_SIZE))[0]
-            print(f"oversize data reference: {self.oversize_data_reference}")
+            # print(f"oversize data reference: {self.oversize_data_reference}")
 
     def read_unknown(self):
         self.fd.read(FIREHOSE_TRACE_POINT_LOG_UNKNOWN_SIZE)
 
     def read_num_of_data_items(self):
         self.num_of_data_items = struct.unpack("<B", self.fd.read(FIREHOSE_TRACE_POINT_LOG_NUM_OF_DATA_ITEMS_SIZE))[0]
-        print(f"number of data items: {self.num_of_data_items}")
+        # print(f"number of data items: {self.num_of_data_items}")
 
     def read_backtrace(self):
         if not self.flags_dict[FIREHOSE_TRACE_POINT_FLAG_HAS_BACKTRACE]:

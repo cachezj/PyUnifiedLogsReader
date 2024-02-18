@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from typing import Union, Tuple, BinaryIO
 from pathlib import Path
 
-import uuid_text
+from accessories import uuid_text
 
 BASE_DIR: Path
 
