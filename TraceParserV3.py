@@ -36,4 +36,3 @@ class TraceV3Parser:
             chunk_set = ChunkSet(self.fd, sub_chunk.uncompressed_data_size)
             for chunk in chunk_set.parse_chunks():
                 chunk.print_v3()
-                chunk.

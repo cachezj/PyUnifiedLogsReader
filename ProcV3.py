@@ -126,3 +126,11 @@ class ProcInfo(GenericTraceV3ChunkSection):
         uuids: {self.uuids_info}
         """)
 
+    def json(self):
+        return dict(
+            processID=self.pid,
+            effectiveUID=self.euid,
+            processImageUUID=self.main_uuid,
+            processImagePath=self.path
+
+        )

@@ -17,6 +17,9 @@ class GenericTraceV3ChunkSection(ABC):
     def print_v3(self):
         pass
 
+    def json(self):
+        pass
+
 
 chunk_number = 1
 
