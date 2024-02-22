@@ -1,3 +1,5 @@
+import os
+
 from TraceParserV3 import *
 import sys
 from accessories import base_file
@@ -18,20 +20,42 @@ def print_not_exists(path: str):
     print(f"{path} does not exists")
 
 
-if __name__ == '__main__':
-    if len(sys.argv) < 3:
-        usage()
-
-    traceV3_file = sys.argv[1]
-    uuid_text_path = sys.argv[2]
+def run_tracev(traceV3_file, uuid_text_path):
     if not Path(traceV3_file).exists():
         print_not_exists(traceV3_file)
+        exit(1)
     if not Path(uuid_text_path).exists():
         print_not_exists(uuid_text_path)
+        exit(1)
 
     base_file.BASE_DIR = Path(uuid_text_path)
     trace_parser = TraceV3Parser(traceV3_file)
     trace_parser.parse_v3_chunks()
+
+
+if __name__ == '__main__':
+    if len(sys.argv) == 2:
+        project_path = sys.argv[1]
+        dirs = os.listdir(project_path)
+        for file in dirs:
+            internaldir = project_path+'/'+file
+            if os.path.isdir(internaldir):
+                internal_files = os.listdir(project_path+'/'+file+'/')
+                #print (internal_files)
+                for tracev in internal_files:
+                    if '.tracev3' in tracev:
+                        print(". tracev3",project_path+'/'+file+'/'+tracev,project_path)
+                        run_tracev(project_path+'/'+file+'/'+tracev,project_path)
+
+            if '.tracev3' in file:
+                print("tracev3")
+    else:
+        traceV3_file = sys.argv[1]
+        uuid_text_path = sys.argv[2]
+        run_tracev(traceV3_file, uuid_text_path)
+    if len(sys.argv) < 3:
+        usage()
+        exit(1)
 
     # a = UuidText(Path("/private/var/db/uuidtext/1B/1980EEE15A310883D2C85FD0249F86")).parse()
     # a.read_string_reference()
