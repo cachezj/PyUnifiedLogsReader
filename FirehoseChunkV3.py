@@ -588,7 +588,7 @@ class SignpostTracePoint(LogTracePoint):
     def read_name_string_ref(self):
         if self.flags_dict[FIREHOSE_TRACE_POINT_FLAG_HAS_NAME_REF]:
             self.name_string_reference_lower = struct.unpack(">I", self.fd.read(4))[0]
-            if self.flags[FIREHOSE_TRACE_POINT_FLAG_HAS_LARGE_OFFSET]:
+            if self.flags_dict[FIREHOSE_TRACE_POINT_FLAG_HAS_LARGE_OFFSET]:
                 self.name_string_reference_upper = struct.unpack(">I", self.fd.read(4))[0]
                 self.name_string_reference = (self.name_string_reference_lower & 0x7fffffff |
                                               self.name_string_reference_upper << 31)
