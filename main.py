@@ -35,20 +35,16 @@ def run_tracev(traceV3_file, uuid_text_path):
 
 if __name__ == '__main__':
     if len(sys.argv) == 2:
-        project_path = sys.argv[1]
-        dirs = os.listdir(project_path)
-        for file in dirs:
-            internaldir = project_path+'/'+file
-            if os.path.isdir(internaldir):
-                internal_files = os.listdir(project_path+'/'+file+'/')
-                #print (internal_files)
-                for tracev in internal_files:
-                    if '.tracev3' in tracev:
-                        print(". tracev3",project_path+'/'+file+'/'+tracev,project_path)
-                        run_tracev(project_path+'/'+file+'/'+tracev,project_path)
+        pp = sys.argv[1]
+        project_path = Path(pp)
 
-            if '.tracev3' in file:
-                print("tracev3")
+        for file in project_path.iterdir():
+            if file.is_dir():
+                for tracev in file.iterdir():
+                    if 'tracev3' in tracev.suffix:
+                        run_tracev(str(tracev), str(project_path))
+            if 'tracev3' in file.suffix:
+                run_tracev(str(file), str(project_path))
     else:
         traceV3_file = sys.argv[1]
         uuid_text_path = sys.argv[2]
