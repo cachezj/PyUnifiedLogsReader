@@ -1,10 +1,8 @@
-from HeaderChunkV3 import *
-from CatalogChunkV3 import *
-from ChunkSetChunkV3 import *
-from BaseV3 import *
+from chunks.CatalogChunkV3 import *
+from chunks.ChunkSetChunkV3 import *
+from sections.BaseV3 import *
 from pathlib import Path
-from typing import Callable
-import Globals
+from utils import Globals
 
 
 class TraceV3Parser:
