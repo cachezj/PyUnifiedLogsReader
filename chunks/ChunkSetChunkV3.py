@@ -25,11 +25,7 @@ class ChunkSet(TraceV3Chunk):
         while reader.tell() != self.uncompressed_data_size_from_sub_chunk:
             chunk_type = read_and_return_to_cursor(reader, reader.tell(), 4)
             chunk_type = struct.unpack("<I", chunk_type)[0]
-            if len(chunks) > 0 and chunks[-1].chunk_number == 44:
-                pass
-                # print(f"{hex(reader.tell())}")
             if chunk_type not in chunk_types.keys():
-                # print(f"{hex(reader.tell())}")
                 raise ValueError("Unknown chunk type")
             chunk_type_human_readable = chunk_types[chunk_type]
             chunk: TraceV3Chunk = ctors_by_chunk_type[chunk_type_human_readable](reader)

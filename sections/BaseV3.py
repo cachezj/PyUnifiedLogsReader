@@ -21,21 +21,18 @@ class GenericTraceV3ChunkSection(ABC):
         pass
 
 
-chunk_number = 1
 
 
 class TraceV3Chunk(GenericTraceV3ChunkSection):
     def __init__(self, tracev3_fd: io.BufferedReader):
         global chunk_number
         super().__init__(tracev3_fd)
-        self.chunk_number = chunk_number
         self.chunk_start = self.fd.tell()
         self.tag = self.parse_tag()
         self.sub_tag = self.parse_subtag()
         self.data_size = self.parse_data_size()
         self.total_chunk_size = self.data_size + CHUNK_DATA_SIZE_SIZE + CHUNK_SUB_TAG_SIZE + CHUNK_TAG_SIZE
         self.type = self.get_chunk_type()
-        chunk_number += 1
 
     def parse_tag(self):
         return hex(struct.unpack("<I", self.fd.read(CHUNK_TAG_SIZE))[0])
