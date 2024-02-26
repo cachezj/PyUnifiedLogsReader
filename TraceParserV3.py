@@ -2,7 +2,7 @@ from chunks.CatalogChunkV3 import *
 from chunks.ChunkSetChunkV3 import *
 from sections.BaseV3 import *
 from pathlib import Path
-from utils import Globals
+from util import Globals
 
 
 class TraceV3Parser:

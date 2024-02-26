@@ -1,5 +1,5 @@
-from sections.ProcV3 import *
-from sections.SubChunkV3 import *
+from ProcV3 import *
+from SubChunkV3 import *
 
 class CatalogChunk(TraceV3Chunk):
     def __init__(self, tracev3_fd: io.BufferedReader):

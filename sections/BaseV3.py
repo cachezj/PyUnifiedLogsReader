@@ -1,5 +1,5 @@
 from abc import *
-from utils.utils import *
+from utils import *
 
 
 class GenericTraceV3ChunkSection(ABC):
