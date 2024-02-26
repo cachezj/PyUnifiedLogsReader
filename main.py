@@ -21,10 +21,10 @@ def print_not_exists(path: str):
 
 
 def run_tracev(traceV3_file, uuid_text):
-    if not Path(traceV3_file).exists():
+    if not traceV3_file.exists():
         print_not_exists(traceV3_file)
         exit(1)
-    if not Path(uuid_text).exists():
+    if not uuid_text.exists():
         print_not_exists(uuid_text)
         exit(1)
 
