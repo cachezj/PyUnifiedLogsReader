@@ -1,13 +1,13 @@
-from Globals import catalog
-from ProcV3 import *
-from FirehoseChunkV3 import *
-from utils import *
+from util.Globals import catalog
+from sections.ProcV3 import *
+from util.utils import *
+from chunk_v3.firehose_structs import Metadata
 
 class FirehoseTracePoint(GenericTraceV3ChunkSection):
-    def __init__(self, tracev3_fd: io.BufferedReader, firehose_chunk: FirehoseChunk):
+    def __init__(self, tracev3_fd: io.BufferedReader, firehose_chunk: Metadata):
         super().__init__(tracev3_fd)
-        self.firehose_main_chunk: FirehoseChunk = firehose_chunk
-        self.proc_id: str = self.firehose_main_chunk.proc_id
+        self.firehose_main_chunk: Metadata = firehose_chunk
+        self.proc_id: str = f"{self.firehose_main_chunk.first_pid}@{self.firehose_main_chunk.second_pid}"
         self.trace_point_private_data: list = list()
         self.sender_image_path: str = "N/A"
         self.sender_uuid: str = "N/A"
@@ -106,13 +106,14 @@ class FirehoseTracePoint(GenericTraceV3ChunkSection):
 
     def read_private_data(self):
         if (FIREHOSE_PRIVATE_VALUE_DATA_RANGE_TYPE not in self.data_sizes_and_offsets.keys() or
-                self.firehose_main_chunk.private_data is None):
+                self.firehose_main_chunk.private_data_offset is None):
             return
-        source_private_data = self.firehose_main_chunk.private_data
+
         for private_metadata in self.data_sizes_and_offsets[FIREHOSE_PRIVATE_VALUE_DATA_RANGE_TYPE]:
             offset = private_metadata["offset"]
             size = private_metadata["size"]
-            self.trace_point_private_data.append(source_private_data[offset:size])
+            self.trace_point_private_data.append(
+                utils.read_and_return_to_cursor(self.firehose_main_chunk.private_data_offset + offset), size)
 
     def read_from_value_data_range(self, base_offset: int, value_type: str):
         for metadata in self.data_sizes_and_offsets[value_type]:
@@ -204,7 +205,7 @@ class FirehoseTracePoint(GenericTraceV3ChunkSection):
 
 class ActivityTracePoint(FirehoseTracePoint):
 
-    def __init__(self, fd: io.BufferedReader, firehose_chunk: FirehoseChunk):
+    def __init__(self, fd: io.BufferedReader, firehose_chunk: Metadata):
         self.aid: str = "N/A"
         self.pid: int = 0
         self.other_aid: str = "N/A"
@@ -267,7 +268,7 @@ class ActivityTracePoint(FirehoseTracePoint):
 
 
 class LossTracePoint(FirehoseTracePoint):
-    def __init__(self, fd: io.BufferedReader, firehose_chunk: FirehoseChunk):
+    def __init__(self, fd: io.BufferedReader, firehose_chunk: Metadata):
         self.start_time: int = 0
         self.end_time: int = 0
         self.num_of_msgs: int = 0
@@ -284,7 +285,7 @@ class LossTracePoint(FirehoseTracePoint):
 
 class TraceTracePoint(FirehoseTracePoint):
 
-    def __init__(self, fd: io.BufferedReader, firehose_chunk: FirehoseChunk):
+    def __init__(self, fd: io.BufferedReader, firehose_chunk: Metadata):
         self.uuid_entry_load_address_lower: int = 0
         self.num_of_values: int = 0
         super().__init__(fd, firehose_chunk)
@@ -300,7 +301,7 @@ class TraceTracePoint(FirehoseTracePoint):
 
 
 class LogTracePoint(FirehoseTracePoint):
-    def __init__(self, fd: io.BufferedReader, firehose_chunk: FirehoseChunk):
+    def __init__(self, fd: io.BufferedReader, firehose_chunk: Metadata):
         # Has current activity identifier flag (0x0001) is set
         self.current_activity_id: int = 0
         # Has private data range flag (0x0100) is set
@@ -480,7 +481,7 @@ class LogTracePoint(FirehoseTracePoint):
 
 
 class SignpostTracePoint(LogTracePoint):
-    def __init__(self, fd: io.BufferedReader, firehose_chunk: FirehoseChunk):
+    def __init__(self, fd: io.BufferedReader, firehose_chunk: Metadata):
         self.name_string_reference_lower: int = 0
         self.name_string_reference_upper: int = 0
         self.name_string_reference: int = 0
@@ -519,7 +520,7 @@ class SignpostTracePoint(LogTracePoint):
 
 
 class UnusedTracePoint(FirehoseTracePoint):
-    def __init__(self, fd: io.BufferedReader, firehose_chunk: FirehoseChunk):
+    def __init__(self, fd: io.BufferedReader, firehose_chunk: Metadata):
         super().__init__(fd, firehose_chunk)
 
     def read_data(self):

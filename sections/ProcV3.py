@@ -1,4 +1,4 @@
-from BaseV3 import *
+from sections.BaseV3 import *
 from accessories.uuid_text import UuidText
 import uuid
 

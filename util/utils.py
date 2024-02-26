@@ -1,6 +1,6 @@
 import io
 import struct
-from consts import *
+from util.consts import *
 import lz4.block
 
 

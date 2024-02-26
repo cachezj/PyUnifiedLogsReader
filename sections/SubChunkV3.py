@@ -1,8 +1,5 @@
-import io
-import struct
-
-from BaseV3 import GenericTraceV3ChunkSection
-from utils import *
+from sections.BaseV3 import GenericTraceV3ChunkSection
+from util.utils import *
 
 class SubChunk(GenericTraceV3ChunkSection):
     def __init__(self, tracev3_fd: io.BufferedReader, procs: list, process_section_offset_global: int, subsystem_strings_offset_globl: int):
