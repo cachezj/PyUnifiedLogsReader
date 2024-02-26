@@ -20,15 +20,15 @@ def print_not_exists(path: str):
     print(f"{path} does not exists")
 
 
-def run_tracev(traceV3_file, uuid_text_path):
+def run_tracev(traceV3_file, uuid_text):
     if not Path(traceV3_file).exists():
         print_not_exists(traceV3_file)
         exit(1)
-    if not Path(uuid_text_path).exists():
-        print_not_exists(uuid_text_path)
+    if not Path(uuid_text).exists():
+        print_not_exists(uuid_text)
         exit(1)
 
-    base_file.BASE_DIR = Path(uuid_text_path)
+    base_file.BASE_DIR = Path(uuid_text)
     trace_parser = TraceV3Parser(traceV3_file)
     trace_parser.parse_v3_chunks()
 
@@ -42,13 +42,13 @@ if __name__ == '__main__':
             if file.is_dir():
                 for tracev in file.iterdir():
                     if 'tracev3' in tracev.suffix:
-                        run_tracev(str(tracev), str(project_path))
+                        run_tracev(tracev, project_path)
             if 'tracev3' in file.suffix:
-                run_tracev(str(file), str(project_path))
+                run_tracev(file, project_path)
     else:
-        traceV3_file = sys.argv[1]
-        uuid_text_path = sys.argv[2]
-        run_tracev(traceV3_file, uuid_text_path)
+        traceV3_file_path = Path(sys.argv[1])
+        uuid_text_path = (sys.argv[2])
+        run_tracev(traceV3_file_path, uuid_text_path)
     if len(sys.argv) < 3:
         usage()
         exit(1)
