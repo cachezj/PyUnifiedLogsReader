@@ -47,7 +47,7 @@ if __name__ == '__main__':
                 run_tracev(file, project_path)
     else:
         traceV3_file_path = Path(sys.argv[1])
-        uuid_text_path = (sys.argv[2])
+        uuid_text_path = Path(sys.argv[2])
         run_tracev(traceV3_file_path, uuid_text_path)
     if len(sys.argv) < 3:
         usage()
