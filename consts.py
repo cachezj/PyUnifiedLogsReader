@@ -190,7 +190,7 @@ FIREHOSE_PRIVATE_VALUE_DATA_RANGE_TYPE = "private"
 firehose_trace_point_record_types = {0x00: "Unused", 0x02: "Activity", 0x03: "Trace", 0x04: "Log", 0x06: "Signpost",
                                      0x07: "Loss"}
 
-stream_types = {0x00: "Persist", 0x01: "Special Handling", 0x02: "Memory", 0x03: "Signpost"}
+stream_types = {0x00: "Persist", 0x01: "Special Handling", 0x02: "Memory", 0x04: "Signpost"}
 
 LOG_TYPE_USER_ACTION = "user_action"
 
